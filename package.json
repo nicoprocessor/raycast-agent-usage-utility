@@ -12,6 +12,15 @@
   "platforms": [
     "macOS"
   ],
+  "preferences": [
+    {
+      "name": "githubOAuthClientId",
+      "type": "textfield",
+      "required": false,
+      "title": "GitHub OAuth Client ID",
+      "description": "Optional one-time setup for GitHub OAuth login flow."
+    }
+  ],
   "commands": [
     {
       "name": "add-provider",

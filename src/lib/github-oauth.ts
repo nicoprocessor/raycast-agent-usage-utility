@@ -18,7 +18,7 @@ type GitHubTokenResponse = {
 export async function authorizeGitHub(clientId: string): Promise<string> {
   const trimmedClientId = clientId.trim();
   if (!trimmedClientId) {
-    throw new Error("GitHub OAuth Client ID is required.");
+    throw new Error("GitHub OAuth Client ID missing. Set it in Extension Preferences.");
   }
 
   const request = await githubOAuthClient.authorizationRequest({

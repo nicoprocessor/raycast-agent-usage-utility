@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getPreset, PRESETS } from "./lib/provider-presets";
 import { setProviderToken } from "./lib/keychain";
@@ -15,7 +15,6 @@ type FormValues = {
   label: string;
   providerId: string;
   token?: string;
-  githubOAuthClientId?: string;
   quotaUrl: string;
   authHeaderName: string;
   authScheme: string;
@@ -30,6 +29,7 @@ function presetFor(kind: ProviderKind) {
 }
 
 export default function AddProviderCommand() {
+  const preferences = getPreferenceValues<{ githubOAuthClientId?: string }>();
   const [kind, setKind] = useState<ProviderKind>("anthropic");
   const [authMode, setAuthMode] = useState<AuthMode>("token");
   const preset = presetFor(kind);
@@ -61,7 +61,7 @@ export default function AddProviderCommand() {
 
     let token = values.token?.trim();
     if (values.kind === "github-copilot" && values.authMode === "oauth") {
-      token = await authorizeGitHub(values.githubOAuthClientId || "");
+      token = await authorizeGitHub(preferences.githubOAuthClientId || "");
     }
     if (!token) {
       throw new Error("API token is required.");
@@ -81,7 +81,26 @@ export default function AddProviderCommand() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Plus} title="Save Provider" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={Icon.Plus}
+            title={supportsOAuth && authMode === "oauth" ? "Authenticate & Save Provider" : "Save Provider"}
+            onSubmit={handleSubmit}
+          />
+          {supportsOAuth && authMode === "oauth" ? (
+            <>
+              <Action
+                icon={Icon.Gear}
+                title="Open Extension Preferences"
+                onAction={openExtensionPreferences}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              />
+              <Action
+                icon={Icon.Globe}
+                title="Open GitHub OAuth App Settings"
+                onAction={() => open("https://github.com/settings/developers")}
+              />
+            </>
+          ) : null}
         </ActionPanel>
       }
     >
@@ -101,7 +120,7 @@ export default function AddProviderCommand() {
       <Form.TextField id="label" title="Display Name" placeholder="My Anthropic Account" />
       <Form.TextField id="providerId" title="Provider ID" placeholder="anthropic-main" />
       {supportsOAuth && authMode === "oauth" ? (
-        <Form.TextField id="githubOAuthClientId" title="GitHub OAuth Client ID" placeholder="Iv1.xxxxxxxx" />
+        <Form.Description text="Premi Authenticate & Save Provider: apro io il link GitHub, fai consenso e torno in Raycast. Configura il Client ID una sola volta nelle Extension Preferences." />
       ) : (
         <Form.PasswordField id="token" title="API Token" />
       )}

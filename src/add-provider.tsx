@@ -5,12 +5,17 @@ import { setProviderToken } from "./lib/keychain";
 import { loadProviders, saveProviders } from "./lib/storage";
 import { ProviderKind } from "./lib/types";
 import { providerIcon } from "./lib/provider-branding";
+import { authorizeGitHub } from "./lib/github-oauth";
+
+type AuthMode = "token" | "oauth";
 
 type FormValues = {
   kind: ProviderKind;
+  authMode?: AuthMode;
   label: string;
   providerId: string;
-  token: string;
+  token?: string;
+  githubOAuthClientId?: string;
   quotaUrl: string;
   authHeaderName: string;
   authScheme: string;
@@ -26,12 +31,13 @@ function presetFor(kind: ProviderKind) {
 
 export default function AddProviderCommand() {
   const [kind, setKind] = useState<ProviderKind>("anthropic");
+  const [authMode, setAuthMode] = useState<AuthMode>("token");
   const preset = presetFor(kind);
+  const supportsOAuth = kind === "github-copilot";
 
   async function handleSubmit(values: FormValues) {
     const providerId = values.providerId.trim().toLowerCase();
     if (!providerId) throw new Error("Provider ID is required.");
-    if (!values.token.trim()) throw new Error("API token is required.");
 
     const existing = await loadProviders();
     if (existing.some((provider) => provider.id === providerId)) {
@@ -53,13 +59,21 @@ export default function AddProviderCommand() {
       },
     };
 
-    await setProviderToken(providerId, values.token.trim());
+    let token = values.token?.trim();
+    if (values.kind === "github-copilot" && values.authMode === "oauth") {
+      token = await authorizeGitHub(values.githubOAuthClientId || "");
+    }
+    if (!token) {
+      throw new Error("API token is required.");
+    }
+
+    await setProviderToken(providerId, token);
     await saveProviders([...existing, next]);
 
     await showToast({
       style: Toast.Style.Success,
       title: "Provider saved",
-      message: `${next.label} added with token in Keychain`,
+      message: `${next.label} added with secure credentials`,
     });
   }
 
@@ -76,9 +90,21 @@ export default function AddProviderCommand() {
           <Form.Dropdown.Item key={item.kind} value={item.kind} title={item.title} icon={providerIcon(item.kind)} />
         ))}
       </Form.Dropdown>
+      {supportsOAuth ? (
+        <Form.Dropdown id="authMode" title="Auth Method" value={authMode} onChange={(value) => setAuthMode(value as AuthMode)}>
+          <Form.Dropdown.Item value="oauth" title="OAuth (GitHub Login)" icon={Icon.Link} />
+          <Form.Dropdown.Item value="token" title="Manual API Token" icon={Icon.Key} />
+        </Form.Dropdown>
+      ) : (
+        <Form.Description text="Authentication method: Manual API Token (OAuth currently available for GitHub only)." />
+      )}
       <Form.TextField id="label" title="Display Name" placeholder="My Anthropic Account" />
       <Form.TextField id="providerId" title="Provider ID" placeholder="anthropic-main" />
-      <Form.PasswordField id="token" title="API Token" />
+      {supportsOAuth && authMode === "oauth" ? (
+        <Form.TextField id="githubOAuthClientId" title="GitHub OAuth Client ID" placeholder="Iv1.xxxxxxxx" />
+      ) : (
+        <Form.PasswordField id="token" title="API Token" />
+      )}
       <Form.Separator />
       <Form.Description text="Customize only if your quota endpoint differs from the default provider setup." />
       <Form.TextField id="quotaUrl" title="Quota API URL" defaultValue={preset.quotaUrl} />

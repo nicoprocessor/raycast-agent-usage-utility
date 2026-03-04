@@ -17,7 +17,9 @@ Raycast extension to track remaining usage quota across AI providers from their 
 - GitHub Copilot
 
 ## Commands
-1. **Add Provider**: add a provider config and store API token in macOS Keychain.
+1. **Add Provider**: add a provider config and store credentials in macOS Keychain.
+   - GitHub Copilot supports **OAuth login** (plus manual token fallback)
+   - Anthropic/OpenAI currently use manual API token
 2. **Usage Status**: fetch provider quota endpoint and show:
    - remaining percentage
    - remaining/used/limit values

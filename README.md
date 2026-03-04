@@ -7,6 +7,9 @@
 
 Raycast extension to track remaining usage quota across AI providers from their cloud APIs.
 
+## Branding
+<img src="./assets/icon.png" alt="Raycast Agent Usage Utility Icon" width="128" />
+
 ## Current Providers
 - Anthropic (Claude Code)
 - OpenAI (GPT Codex)
@@ -21,7 +24,7 @@ Raycast extension to track remaining usage quota across AI providers from their 
    - reset timestamp when exposed
 
 ## Security
-- Sensitive tokens are stored only in macOS Keychain via `keytar`.
+- Sensitive tokens are stored only in macOS Keychain via `/usr/bin/security`.
 - Provider metadata only (non-secrets) is saved in Raycast LocalStorage.
 - No clear text passwords/tokens are persisted in extension storage.
 

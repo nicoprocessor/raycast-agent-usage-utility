@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-agent-usage-utility",
+  "title": "Raycast Agent Usage Utility",
+  "description": "Track remaining AI provider quota percentages across Anthropic, OpenAI Codex, and GitHub Copilot.",
+  "icon": "icon.png",
+  "author": "nicoprocessor",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "add-provider",
+      "title": "Add Provider",
+      "subtitle": "Agent Usage",
+      "description": "Add a provider and securely save its token in Keychain",
+      "mode": "view"
+    },
+    {
+      "name": "usage-status",
+      "title": "Usage Status",
+      "subtitle": "Agent Usage",
+      "description": "Show remaining provider quota percentages and reset windows",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2",
+    "keytar": "^7.9.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "20.19.9",
+    "eslint": "^9.39.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  }
+}

@@ -1,12 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { providerIcon, providerLabel } from "./lib/provider-branding";
 import { fetchUsage } from "./lib/usage";
 import { loadProviders } from "./lib/storage";
+import { ProviderKind } from "./lib/types";
 
 type ProviderWithUsage = {
   id: string;
   label: string;
-  kind: string;
+  kind: ProviderKind;
   usage?: {
     remainingPercent: number;
     remaining: number;
@@ -70,10 +72,14 @@ export default function UsageStatusCommand() {
         return (
           <List.Item
             key={item.id}
-            icon={{ source: isHealthy ? Icon.CheckCircle : Icon.Warning, tintColor: isHealthy ? Color.Green : Color.Red }}
+            icon={providerIcon(item.kind)}
             title={item.label}
-            subtitle={item.kind}
+            subtitle={providerLabel(item.kind)}
             accessories={[
+              {
+                icon: { source: isHealthy ? Icon.CheckCircle : Icon.Warning, tintColor: isHealthy ? Color.Green : Color.Red },
+                tooltip: isHealthy ? "Usage fetch ok" : "Usage fetch error",
+              },
               { text: percentText },
               item.usage?.period ? { text: item.usage.period } : { text: "period n/a" },
             ]}
@@ -83,6 +89,7 @@ export default function UsageStatusCommand() {
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Provider ID" text={item.id} />
+                    <List.Item.Detail.Metadata.Label title="Provider" icon={providerIcon(item.kind)} text={providerLabel(item.kind)} />
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label title="Remaining" text={`${item.usage?.remaining ?? 0}`} />
                     <List.Item.Detail.Metadata.Label title="Used" text={`${item.usage?.used ?? 0}`} />

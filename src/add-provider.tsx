@@ -4,6 +4,7 @@ import { getPreset, PRESETS } from "./lib/provider-presets";
 import { setProviderToken } from "./lib/keychain";
 import { loadProviders, saveProviders } from "./lib/storage";
 import { ProviderKind } from "./lib/types";
+import { providerIcon } from "./lib/provider-branding";
 
 type FormValues = {
   kind: ProviderKind;
@@ -72,7 +73,7 @@ export default function AddProviderCommand() {
     >
       <Form.Dropdown id="kind" title="Provider" value={kind} onChange={(value) => setKind(value as ProviderKind)}>
         {PRESETS.map((item) => (
-          <Form.Dropdown.Item key={item.kind} value={item.kind} title={item.title} />
+          <Form.Dropdown.Item key={item.kind} value={item.kind} title={item.title} icon={providerIcon(item.kind)} />
         ))}
       </Form.Dropdown>
       <Form.TextField id="label" title="Display Name" placeholder="My Anthropic Account" />

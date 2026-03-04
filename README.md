@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./assets/icon.png" alt="Raycast Agent Usage Utility Icon" width="128" />
+</p>
+
 # Raycast Agent Usage Utility
 
 [![Build](https://img.shields.io/github/actions/workflow/status/nicoprocessor/raycast-agent-usage-utility/ci.yml?branch=main&label=build)](https://github.com/nicoprocessor/raycast-agent-usage-utility/actions/workflows/ci.yml)
@@ -6,9 +10,6 @@
 [![Raycast Extension](https://img.shields.io/badge/Raycast-Extension-ff6363.svg)](https://www.raycast.com)
 
 Raycast extension to track remaining usage quota across AI providers from their cloud APIs.
-
-## Branding
-<img src="./assets/icon.png" alt="Raycast Agent Usage Utility Icon" width="128" />
 
 ## Current Providers
 - Anthropic (Claude Code)

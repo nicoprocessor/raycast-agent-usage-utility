@@ -18,9 +18,9 @@ Raycast extension to track remaining usage quota across AI providers from their 
 
 ## Commands
 1. **Add Provider**: add a provider config and store credentials in macOS Keychain.
-   - GitHub Copilot supports **OAuth login** (plus manual token fallback)
-   - Anthropic/OpenAI currently use manual API token
-   - In OAuth mode, the extension opens the GitHub consent flow automatically
+   - Manual token/key setup
+   - Provider-specific guide available directly in command
+   - Dynamic defaults/placeholders when switching provider
 2. **Usage Status**: fetch provider quota endpoint and show:
    - remaining percentage
    - remaining/used/limit values
@@ -31,10 +31,6 @@ Raycast extension to track remaining usage quota across AI providers from their 
 - Sensitive tokens are stored only in macOS Keychain via `/usr/bin/security`.
 - Provider metadata only (non-secrets) is saved in Raycast LocalStorage.
 - No clear text passwords/tokens are persisted in extension storage.
-
-## OAuth Setup (GitHub)
-- Set `GitHub OAuth Client ID` once in Raycast Extension Preferences.
-- Then choose `GitHub Copilot` + `OAuth` in Add Provider and use `Authenticate & Save Provider`.
 
 ## Development
 ```bash

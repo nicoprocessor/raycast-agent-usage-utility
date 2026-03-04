@@ -1,20 +1,16 @@
-import { Action, ActionPanel, Form, Icon, getPreferenceValues, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { getPreset, PRESETS } from "./lib/provider-presets";
 import { setProviderToken } from "./lib/keychain";
 import { loadProviders, saveProviders } from "./lib/storage";
 import { ProviderKind } from "./lib/types";
 import { providerIcon } from "./lib/provider-branding";
-import { authorizeGitHub } from "./lib/github-oauth";
-
-type AuthMode = "token" | "oauth";
 
 type FormValues = {
   kind: ProviderKind;
-  authMode?: AuthMode;
   label: string;
   providerId: string;
-  token?: string;
+  token: string;
   quotaUrl: string;
   authHeaderName: string;
   authScheme: string;
@@ -25,23 +21,24 @@ type FormValues = {
 };
 
 function presetFor(kind: ProviderKind) {
-  return getPreset(kind).defaultConfig;
+  return getPreset(kind);
 }
 
 export default function AddProviderCommand() {
-  const preferences = getPreferenceValues<{ githubOAuthClientId?: string }>();
   const [kind, setKind] = useState<ProviderKind>("anthropic");
-  const [authMode, setAuthMode] = useState<AuthMode>("token");
   const preset = presetFor(kind);
-  const supportsOAuth = kind === "github-copilot";
 
   async function handleSubmit(values: FormValues) {
     const providerId = values.providerId.trim().toLowerCase();
-    if (!providerId) throw new Error("Provider ID is required.");
+    if (!providerId) {
+      await showToast({ style: Toast.Style.Failure, title: "Provider ID is required" });
+      return;
+    }
 
     const existing = await loadProviders();
     if (existing.some((provider) => provider.id === providerId)) {
-      throw new Error(`Provider ID '${providerId}' already exists.`);
+      await showToast({ style: Toast.Style.Failure, title: `Provider ID '${providerId}' already exists` });
+      return;
     }
 
     const next = {
@@ -59,12 +56,10 @@ export default function AddProviderCommand() {
       },
     };
 
-    let token = values.token?.trim();
-    if (values.kind === "github-copilot" && values.authMode === "oauth") {
-      token = await authorizeGitHub(preferences.githubOAuthClientId || "");
-    }
+    const token = values.token?.trim();
     if (!token) {
-      throw new Error("API token is required.");
+      await showToast({ style: Toast.Style.Failure, title: "API token is required" });
+      return;
     }
 
     await setProviderToken(providerId, token);
@@ -81,26 +76,13 @@ export default function AddProviderCommand() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Plus}
-            title={supportsOAuth && authMode === "oauth" ? "Authenticate & Save Provider" : "Save Provider"}
-            onSubmit={handleSubmit}
+          <Action.SubmitForm icon={Icon.Plus} title="Save Provider" onSubmit={handleSubmit} />
+          <Action.Push
+            icon={Icon.Info}
+            title="Provider Setup Guide"
+            shortcut={{ modifiers: ["cmd"], key: "g" }}
+            target={<ProviderGuideDetail title={preset.title} markdown={preset.setupGuideMarkdown} />}
           />
-          {supportsOAuth && authMode === "oauth" ? (
-            <>
-              <Action
-                icon={Icon.Gear}
-                title="Open Extension Preferences"
-                onAction={openExtensionPreferences}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-              />
-              <Action
-                icon={Icon.Globe}
-                title="Open GitHub OAuth App Settings"
-                onAction={() => open("https://github.com/settings/developers")}
-              />
-            </>
-          ) : null}
         </ActionPanel>
       }
     >
@@ -109,30 +91,65 @@ export default function AddProviderCommand() {
           <Form.Dropdown.Item key={item.kind} value={item.kind} title={item.title} icon={providerIcon(item.kind)} />
         ))}
       </Form.Dropdown>
-      {supportsOAuth ? (
-        <Form.Dropdown id="authMode" title="Auth Method" value={authMode} onChange={(value) => setAuthMode(value as AuthMode)}>
-          <Form.Dropdown.Item value="oauth" title="OAuth (GitHub Login)" icon={Icon.Link} />
-          <Form.Dropdown.Item value="token" title="Manual API Token" icon={Icon.Key} />
-        </Form.Dropdown>
-      ) : (
-        <Form.Description text="Authentication method: Manual API Token (OAuth currently available for GitHub only)." />
-      )}
-      <Form.TextField id="label" title="Display Name" placeholder="My Anthropic Account" />
-      <Form.TextField id="providerId" title="Provider ID" placeholder="anthropic-main" />
-      {supportsOAuth && authMode === "oauth" ? (
-        <Form.Description text="Premi Authenticate & Save Provider: apro io il link GitHub, fai consenso e torno in Raycast. Configura il Client ID una sola volta nelle Extension Preferences." />
-      ) : (
-        <Form.PasswordField id="token" title="API Token" />
-      )}
+      <Form.Description text="Press ⌘G for provider-specific setup instructions." />
+      <Form.TextField key={`label-${kind}`} id="label" title="Display Name" placeholder={preset.placeholders.label} />
+      <Form.TextField key={`provider-id-${kind}`} id="providerId" title="Provider ID" placeholder={preset.placeholders.providerId} />
+      <Form.PasswordField key={`token-${kind}`} id="token" title={preset.tokenLabel} placeholder={preset.placeholders.token} />
       <Form.Separator />
       <Form.Description text="Customize only if your quota endpoint differs from the default provider setup." />
-      <Form.TextField id="quotaUrl" title="Quota API URL" defaultValue={preset.quotaUrl} />
-      <Form.TextField id="authHeaderName" title="Auth Header Name" defaultValue={preset.authHeaderName} />
-      <Form.TextField id="authScheme" title="Auth Scheme (Optional)" defaultValue={preset.authScheme || ""} />
-      <Form.TextField id="limitPath" title="JSON Path: Limit" defaultValue={preset.fieldMap.limitPath} />
-      <Form.TextField id="usedPath" title="JSON Path: Used" defaultValue={preset.fieldMap.usedPath} />
-      <Form.TextField id="periodPath" title="JSON Path: Period (Optional)" defaultValue={preset.fieldMap.periodPath || ""} />
-      <Form.TextField id="resetAtPath" title="JSON Path: Reset At (Optional)" defaultValue={preset.fieldMap.resetAtPath || ""} />
+      <Form.TextField
+        key={`quota-url-${kind}`}
+        id="quotaUrl"
+        title="Quota API URL"
+        defaultValue={preset.defaultConfig.quotaUrl}
+        placeholder={preset.placeholders.quotaUrl}
+      />
+      <Form.TextField
+        key={`auth-header-${kind}`}
+        id="authHeaderName"
+        title="Auth Header Name"
+        defaultValue={preset.defaultConfig.authHeaderName}
+        placeholder={preset.placeholders.authHeaderName}
+      />
+      <Form.TextField
+        key={`auth-scheme-${kind}`}
+        id="authScheme"
+        title="Auth Scheme (Optional)"
+        defaultValue={preset.defaultConfig.authScheme || ""}
+        placeholder={preset.placeholders.authScheme}
+      />
+      <Form.TextField
+        key={`limit-path-${kind}`}
+        id="limitPath"
+        title="JSON Path: Limit"
+        defaultValue={preset.defaultConfig.fieldMap.limitPath}
+        placeholder={preset.placeholders.limitPath}
+      />
+      <Form.TextField
+        key={`used-path-${kind}`}
+        id="usedPath"
+        title="JSON Path: Used"
+        defaultValue={preset.defaultConfig.fieldMap.usedPath}
+        placeholder={preset.placeholders.usedPath}
+      />
+      <Form.TextField
+        key={`period-path-${kind}`}
+        id="periodPath"
+        title="JSON Path: Period (Optional)"
+        defaultValue={preset.defaultConfig.fieldMap.periodPath || ""}
+        placeholder={preset.placeholders.periodPath}
+      />
+      <Form.TextField
+        key={`reset-path-${kind}`}
+        id="resetAtPath"
+        title="JSON Path: Reset At (Optional)"
+        defaultValue={preset.defaultConfig.fieldMap.resetAtPath || ""}
+        placeholder={preset.placeholders.resetAtPath}
+      />
     </Form>
   );
+}
+
+function ProviderGuideDetail(props: { title: string; markdown: string }) {
+  return <Detail markdown={props.markdown} navigationTitle={`${props.title} Guide`} />;
 }

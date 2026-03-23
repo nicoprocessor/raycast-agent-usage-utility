@@ -12,11 +12,13 @@
 Raycast extension to track remaining usage quota across AI providers from their cloud APIs.
 
 ## Current Providers
+
 - Anthropic (Claude Code)
 - OpenAI (GPT Codex)
 - GitHub Copilot
 
 ## Commands
+
 1. **Add Provider**: add a provider config and store credentials in macOS Keychain.
    - Manual token/key setup
    - Provider-specific guide available directly in command
@@ -28,11 +30,13 @@ Raycast extension to track remaining usage quota across AI providers from their 
    - reset timestamp when exposed
 
 ## Security
+
 - Sensitive tokens are stored only in macOS Keychain via `/usr/bin/security`.
 - Provider metadata only (non-secrets) is saved in Raycast LocalStorage.
 - No clear text passwords/tokens are persisted in extension storage.
 
 ## Development
+
 ```bash
 npm install
 npm run typecheck
@@ -40,4 +44,5 @@ npm run lint
 ```
 
 ## Notes
+
 Provider quota APIs are not uniform. The extension exposes configurable JSON field mapping (`limitPath`, `usedPath`, `periodPath`, `resetAtPath`) per provider.

@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Detail, Form, Icon, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState } from "react";
 import { getPreset, PRESETS } from "./lib/provider-presets";
 import { setProviderToken } from "./lib/keychain";
@@ -31,13 +39,19 @@ export default function AddProviderCommand() {
   async function handleSubmit(values: FormValues) {
     const providerId = values.providerId.trim().toLowerCase();
     if (!providerId) {
-      await showToast({ style: Toast.Style.Failure, title: "Provider ID is required" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Provider ID is required",
+      });
       return;
     }
 
     const existing = await loadProviders();
     if (existing.some((provider) => provider.id === providerId)) {
-      await showToast({ style: Toast.Style.Failure, title: `Provider ID '${providerId}' already exists` });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Provider ID '${providerId}' already exists`,
+      });
       return;
     }
 
@@ -58,7 +72,10 @@ export default function AddProviderCommand() {
 
     const token = values.token?.trim();
     if (!token) {
-      await showToast({ style: Toast.Style.Failure, title: "API token is required" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "API token is required",
+      });
       return;
     }
 
@@ -76,25 +93,59 @@ export default function AddProviderCommand() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Plus} title="Save Provider" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            icon={Icon.Plus}
+            title="Save Provider"
+            onSubmit={handleSubmit}
+          />
           <Action.Push
             icon={Icon.Info}
             title="Provider Setup Guide"
             shortcut={{ modifiers: ["cmd"], key: "g" }}
-            target={<ProviderGuideDetail title={preset.title} markdown={preset.setupGuideMarkdown} />}
+            target={
+              <ProviderGuideDetail
+                title={preset.title}
+                markdown={preset.setupGuideMarkdown}
+              />
+            }
           />
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="kind" title="Provider" value={kind} onChange={(value) => setKind(value as ProviderKind)}>
+      <Form.Dropdown
+        id="kind"
+        title="Provider"
+        value={kind}
+        onChange={(value) => setKind(value as ProviderKind)}
+      >
         {PRESETS.map((item) => (
-          <Form.Dropdown.Item key={item.kind} value={item.kind} title={item.title} icon={providerIcon(item.kind)} />
+          <Form.Dropdown.Item
+            key={item.kind}
+            value={item.kind}
+            title={item.title}
+            icon={providerIcon(item.kind)}
+          />
         ))}
       </Form.Dropdown>
       <Form.Description text="Press ⌘G for provider-specific setup instructions." />
-      <Form.TextField key={`label-${kind}`} id="label" title="Display Name" placeholder={preset.placeholders.label} />
-      <Form.TextField key={`provider-id-${kind}`} id="providerId" title="Provider ID" placeholder={preset.placeholders.providerId} />
-      <Form.PasswordField key={`token-${kind}`} id="token" title={preset.tokenLabel} placeholder={preset.placeholders.token} />
+      <Form.TextField
+        key={`label-${kind}`}
+        id="label"
+        title="Display Name"
+        placeholder={preset.placeholders.label}
+      />
+      <Form.TextField
+        key={`provider-id-${kind}`}
+        id="providerId"
+        title="Provider ID"
+        placeholder={preset.placeholders.providerId}
+      />
+      <Form.PasswordField
+        key={`token-${kind}`}
+        id="token"
+        title={preset.tokenLabel}
+        placeholder={preset.placeholders.token}
+      />
       <Form.Separator />
       <Form.Description text="Customize only if your quota endpoint differs from the default provider setup." />
       <Form.TextField
@@ -151,5 +202,10 @@ export default function AddProviderCommand() {
 }
 
 function ProviderGuideDetail(props: { title: string; markdown: string }) {
-  return <Detail markdown={props.markdown} navigationTitle={`${props.title} Guide`} />;
+  return (
+    <Detail
+      markdown={props.markdown}
+      navigationTitle={`${props.title} Guide`}
+    />
+  );
 }

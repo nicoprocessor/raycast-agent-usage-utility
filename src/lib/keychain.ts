@@ -9,12 +9,31 @@ async function runSecurity(args: string[]): Promise<string> {
   return stdout.trim();
 }
 
-export async function setProviderToken(providerId: string, token: string): Promise<void> {
-  await runSecurity(["add-generic-password", "-a", providerId, "-s", KEYCHAIN_SERVICE, "-U", "-w", token]);
+export async function setProviderToken(
+  providerId: string,
+  token: string,
+): Promise<void> {
+  await runSecurity([
+    "add-generic-password",
+    "-a",
+    providerId,
+    "-s",
+    KEYCHAIN_SERVICE,
+    "-U",
+    "-w",
+    token,
+  ]);
 }
 
 export async function getProviderToken(providerId: string): Promise<string> {
-  const token = await runSecurity(["find-generic-password", "-a", providerId, "-s", KEYCHAIN_SERVICE, "-w"]);
+  const token = await runSecurity([
+    "find-generic-password",
+    "-a",
+    providerId,
+    "-s",
+    KEYCHAIN_SERVICE,
+    "-w",
+  ]);
   if (!token) {
     throw new Error(`No token found in Keychain for provider '${providerId}'.`);
   }
@@ -23,9 +42,18 @@ export async function getProviderToken(providerId: string): Promise<string> {
 
 export async function deleteProviderToken(providerId: string): Promise<void> {
   try {
-    await runSecurity(["delete-generic-password", "-a", providerId, "-s", KEYCHAIN_SERVICE]);
+    await runSecurity([
+      "delete-generic-password",
+      "-a",
+      providerId,
+      "-s",
+      KEYCHAIN_SERVICE,
+    ]);
   } catch (error) {
-    if (error instanceof Error && error.message.includes("could not be found")) {
+    if (
+      error instanceof Error &&
+      error.message.includes("could not be found")
+    ) {
       return;
     }
     throw error;

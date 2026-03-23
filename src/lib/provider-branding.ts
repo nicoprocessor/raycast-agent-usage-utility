@@ -4,8 +4,16 @@ import { ProviderKind } from "./types";
 
 const PROVIDER_ICON_MAP: Record<ProviderKind, Image.ImageLike> = {
   anthropic: path.join(environment.assetsPath, "providers", "anthropic.svg"),
-  "openai-codex": path.join(environment.assetsPath, "providers", "openai-codex.svg"),
-  "github-copilot": path.join(environment.assetsPath, "providers", "github-copilot.svg"),
+  "openai-codex": path.join(
+    environment.assetsPath,
+    "providers",
+    "openai-codex.svg",
+  ),
+  "github-copilot": path.join(
+    environment.assetsPath,
+    "providers",
+    "github-copilot.svg",
+  ),
 };
 
 const PROVIDER_LABEL_MAP: Record<ProviderKind, string> = {

@@ -29,13 +29,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.8",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "20.19.9",
-    "eslint": "^9.39.0",
+    "@types/node": "^25.5.0",
+    "eslint": "^10.1.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.6.2",
     "typescript": "^5.9.3"
   },
@@ -43,6 +45,19 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "echo \"No tests configured\"",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css,scss}": [
+      "prettier --write"
+    ]
   }
 }

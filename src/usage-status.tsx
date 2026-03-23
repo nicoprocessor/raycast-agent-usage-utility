@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { providerIcon, providerLabel } from "./lib/provider-branding";
 import { fetchUsage } from "./lib/usage";
@@ -77,33 +85,69 @@ export default function UsageStatusCommand() {
             subtitle={providerLabel(item.kind)}
             accessories={[
               {
-                icon: { source: isHealthy ? Icon.CheckCircle : Icon.Warning, tintColor: isHealthy ? Color.Green : Color.Red },
+                icon: {
+                  source: isHealthy ? Icon.CheckCircle : Icon.Warning,
+                  tintColor: isHealthy ? Color.Green : Color.Red,
+                },
                 tooltip: isHealthy ? "Usage fetch ok" : "Usage fetch error",
               },
               { text: percentText },
-              item.usage?.period ? { text: item.usage.period } : { text: "period n/a" },
+              item.usage?.period
+                ? { text: item.usage.period }
+                : { text: "period n/a" },
             ]}
             detail={
               <List.Item.Detail
-                markdown={isHealthy ? formatUsage(item) : `## Error\n\n${item.error}`}
+                markdown={
+                  isHealthy ? formatUsage(item) : `## Error\n\n${item.error}`
+                }
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Provider ID" text={item.id} />
-                    <List.Item.Detail.Metadata.Label title="Provider" icon={providerIcon(item.kind)} text={providerLabel(item.kind)} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Provider ID"
+                      text={item.id}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Provider"
+                      icon={providerIcon(item.kind)}
+                      text={providerLabel(item.kind)}
+                    />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label title="Remaining" text={`${item.usage?.remaining ?? 0}`} />
-                    <List.Item.Detail.Metadata.Label title="Used" text={`${item.usage?.used ?? 0}`} />
-                    <List.Item.Detail.Metadata.Label title="Limit" text={`${item.usage?.limit ?? 0}`} />
-                    <List.Item.Detail.Metadata.Label title="Remaining %" text={percentText} />
-                    <List.Item.Detail.Metadata.Label title="Period" text={item.usage?.period ?? "n/a"} />
-                    <List.Item.Detail.Metadata.Label title="Reset At" text={item.usage?.resetAt ?? "n/a"} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Remaining"
+                      text={`${item.usage?.remaining ?? 0}`}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Used"
+                      text={`${item.usage?.used ?? 0}`}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Limit"
+                      text={`${item.usage?.limit ?? 0}`}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Remaining %"
+                      text={percentText}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Period"
+                      text={item.usage?.period ?? "n/a"}
+                    />
+                    <List.Item.Detail.Metadata.Label
+                      title="Reset At"
+                      text={item.usage?.resetAt ?? "n/a"}
+                    />
                   </List.Item.Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={revalidate}
+                />
               </ActionPanel>
             }
           />
